@@ -551,40 +551,18 @@ footer .disc{margin-top:22px;line-height:1.9}
     c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=1.2;for(let i=1;i<4;i++){c.beginPath();c.moveTo(x-62*s-i*16*s,y+12*s+i*2);c.lineTo(x-62*s-i*16*s-24*s,y+12*s+i*2);c.stroke();}}
   function stars(c,W,h,n,t,seed){const r=rng(seed);for(let i=0;i<n;i++){const x=r()*W,y=r()*h,a=reduce?.8:.45+.55*Math.abs(Math.sin(t/900+i*1.7));c.fillStyle=`rgba(255,255,255,${a})`;const z=r()<.08?2:1.1;c.beginPath();c.arc(x,y,z,0,7);c.fill();if(z>1.5){c.strokeStyle=`rgba(255,255,255,${a*.5})`;c.lineWidth=1;c.beginPath();c.moveTo(x-5,y);c.lineTo(x+5,y);c.moveTo(x,y-5);c.lineTo(x,y+5);c.stroke();}}}
 
-  /* ローポリのチーズタルト（月の代わり）*/
-  const TART={};
-  function tartMesh(){if(TART.tris)return TART.tris;const r=rng(42),N=24,R=[0,.22,.42,.58,.7,.78,.84,.92,1],tris=[];
-    const rings=R.map((rr,i)=>{if(i===0)return[[0,0]];const off=(i%2)*.5,last=i===R.length-1,pts=[];for(let k=0;k<N;k++){const a=(k+off)/N*Math.PI*2,j=last?(k%2?.955:1.03):(i>=6?1+(r()-.5)*.03:1+(r()-.5)*.05);pts.push([Math.cos(a)*rr*j,Math.sin(a)*rr*j]);}return pts;});
-    const col=(x,y,rad,pick,k)=>{const lit=(-x*.6-y)*.5;let h,s,l;
-      if(rad<.7){h=47;s=96;l=60+lit*12+(pick-.5)*6;}            // とろっとしたチーズ
-      else if(rad<.84){h=38;s=90;l=52+lit*12+(pick-.5)*6;}         // 焼き色のついたふち
-      else{h=33;s=72;l=(k%2?58:66)+lit*12+(pick-.5)*5;}           // タルト生地のひだ
-      return`hsl(${h} ${s}% ${Math.max(20,Math.min(84,l))}%)`;};
-    const push=(p,k)=>{const cx=(p[0][0]+p[1][0]+p[2][0])/3,cy=(p[0][1]+p[1][1]+p[2][1])/3;tris.push([p,col(cx,cy,Math.hypot(cx,cy),r(),k)]);};
-    for(let i=0;i<rings.length-1;i++){const A=rings[i],B=rings[i+1];
-      if(A.length===1){for(let k=0;k<N;k++)push([A[0],B[k],B[(k+1)%N]],k);continue;}
-      for(let k=0;k<N;k++){const a0=A[k],a1=A[(k+1)%N],b0=B[k],b1=B[(k+1)%N];push([a0,a1,b1],k);push([a0,b1,b0],k);}}
-    TART.rim=rings[rings.length-1];return TART.tris=tris;}
-  function polyTart(c,x,y,r,t){const tris=tartMesh(),rim=TART.rim,sq=.8,dep=r*.2,wob=reduce?0:Math.sin(t/2600)*.03;
-    c.save();c.translate(x,y-dep*.4);c.rotate(wob);
-    // 側面（タルトの厚み）
-    rim.forEach((p,k)=>{const q=rim[(k+1)%rim.length];if(p[1]+q[1]<-.3)return;const lit=(-(p[0]+q[0])*.5);c.fillStyle=`hsl(30 65% ${Math.max(28,44+lit*10+(k%2?-4:4))}%)`;c.beginPath();c.moveTo(p[0]*r,p[1]*r*sq);c.lineTo(q[0]*r,q[1]*r*sq);c.lineTo(q[0]*r,q[1]*r*sq+dep);c.lineTo(p[0]*r,p[1]*r*sq+dep);c.closePath();c.fill();});
-    // 上面
-    tris.forEach(([p,f])=>{c.fillStyle=f;c.strokeStyle=f;c.lineWidth=.8;c.beginPath();c.moveTo(p[0][0]*r,p[0][1]*r*sq);c.lineTo(p[1][0]*r,p[1][1]*r*sq);c.lineTo(p[2][0]*r,p[2][1]*r*sq);c.closePath();c.fill();c.stroke();});
-    // 表面に焼き付けた「PABLO」の文字
-    c.save();c.scale(1,sq);c.textAlign='center';c.textBaseline='middle';c.font=`700 ${Math.round(r*.36)}px "Cormorant Garamond","Times New Roman",serif`;
-    if(c.letterSpacing!==undefined)c.letterSpacing=`${Math.round(r*.03)}px`;
-    c.fillStyle='rgba(255,246,200,.55)';c.fillText('PABLO',-r*.012,r*.02-r*.012);
-    c.fillStyle='rgba(150,78,18,.82)';c.fillText('PABLO',0,r*.02);
-    c.restore();
-    const g=c.createRadialGradient(-r*.22,-r*.22*sq,0,-r*.22,-r*.22*sq,r*.5);g.addColorStop(0,'rgba(255,255,230,.45)');g.addColorStop(1,'rgba(255,255,230,0)');c.fillStyle=g;c.beginPath();c.ellipse(0,0,r*.66,r*.66*sq,0,0,7);c.fill();
-    c.restore();}
+  /* 月の真ん中の「PABLO」マーク */
+  function moonMark(c,x,y,r){c.save();c.textAlign='center';c.textBaseline='middle';
+    c.strokeStyle='rgba(150,90,30,.55)';c.lineWidth=Math.max(1,r*.018);c.beginPath();c.arc(x,y,r*.62,0,7);c.stroke();
+    c.font=`700 ${Math.round(r*.34)}px "Cormorant Garamond","Times New Roman",serif`;if(c.letterSpacing!==undefined)c.letterSpacing=`${Math.round(r*.03)}px`;
+    c.fillStyle='rgba(255,255,240,.7)';c.fillText('PABLO',x-r*.01,y+r*.01-r*.012);
+    c.fillStyle='rgba(140,80,22,.85)';c.fillText('PABLO',x,y+r*.01);c.restore();}
   function paintKV(cv,kind,t){
     const c=cv.getContext('2d'),W=cv.clientWidth,H=cv.clientHeight,D=Math.min(2,devicePixelRatio||1);
     if(cv.width!==Math.round(W*D)){cv.width=Math.round(W*D);cv.height=Math.round(H*D);}
     c.setTransform(D,0,0,D,0,0);const hz=H*.7,narrow=W<640;const focus=narrow?W*.5:W*.66;
     sky(c,W,H,hz,kind);
-    if(kind==='moon'){stars(c,W,hz*.7,80,t,3);const mx=focus+W*.08,my=H*.32,mr=Math.min(H*.24,W*.13);glow(c,mx,my,mr*3,'rgba(255,214,140,.38)');polyTart(c,mx,my,mr,t);}
+    if(kind==='moon'){stars(c,W,hz*.7,80,t,3);const mx=focus+W*.08,my=H*.32,mr=Math.min(H*.24,W*.13);glow(c,mx,my,mr*3,'rgba(255,236,190,.35)');c.fillStyle='#fff4d6';c.beginPath();c.arc(mx,my,mr,0,7);c.fill();c.fillStyle='rgba(230,210,170,.35)';[[-.55,-.45,.13],[.5,.42,.11],[-.42,.55,.08],[.6,-.38,.07]].forEach(([a,b,r])=>{c.beginPath();c.arc(mx+a*mr,my+b*mr,r*mr,0,7);c.fill();});moonMark(c,mx,my,mr);}
     if(kind==='dusk'){const sx=focus+W*.1,sy=hz-4;glow(c,sx,sy,H*.7,'rgba(255,200,120,.55)');c.fillStyle='#ffd9a0';c.beginPath();c.arc(sx,sy,H*.1,Math.PI,0);c.fill();const dx=reduce?0:(t/120)%(W+300);cloud(c,(W*.2+dx)%(W+300)-150,H*.2,22,'rgba(255,214,220,.75)');cloud(c,(W*.6+dx*.7)%(W+300)-150,H*.33,16,'rgba(255,190,200,.6)');}
     if(kind==='stars'){stars(c,W,hz,160,t,11);c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=1.5;const sp=reduce?0:(t/40)%(W*3);if(sp<W*1.2){c.beginPath();c.moveTo(W*.95-sp*.5,H*.08+sp*.12);c.lineTo(W*.95-sp*.5+40,H*.08+sp*.12-10);c.stroke();}}
     skyline(c,W,hz,H*.32,kind==='dusk'?'#6d55a8':'#30307a',false,5,t);
